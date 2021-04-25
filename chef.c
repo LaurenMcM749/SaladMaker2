@@ -32,6 +32,8 @@
 // schmat() - attach segment, pass in id
 // schmctl() - ??
 
+//Source - randomc numbers:https://www.geeksforgeeks.org/generating-random-number-range-c/
+
 
 #include <sys/types.h>
 #include <sys/ipc.h> 
@@ -44,6 +46,17 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <fcntl.h>
+
+// Generates and prints 'count' random
+// numbers in range [lower, upper].
+int printRandoms(int lower, int upper, int count)                         
+{
+    int i;
+    for (i = 0; i < count; i++) {
+        int num = (rand() %(upper - lower + 1)) + lower;
+        return num;
+    }
+}
 
 
 int main (int argc, char ** argv){
@@ -58,6 +71,24 @@ int main (int argc, char ** argv){
         int pep2;
         int on1;
         int on2;
+        int TO_tomweight;
+        int TP_tomweight;
+        int TO_onweight;
+        int OP_onweight;
+        int TP_pepweight;
+        int OP_pepweight;
+        int TO_tom_dif;
+        int TP_tom_dif;
+        int OP_on_dif;
+        int TO_on_dif;
+        int TP_pep_dif;
+        int OP_pep_dif;
+        double TO_wait;
+        double TO_make;
+        double TP_wait;
+        double TP_make;
+        double OP_make;
+        double OP_wait;
     };
 
     int id= 0;
@@ -85,6 +116,7 @@ int main (int argc, char ** argv){
     const char * o_name;
     const char * p_name;
     struct Veggies *veggies;
+    int x;
 
     // Make shared memory segment
     // key - IPC_PRVIATE, size = 10, flag = 0666
@@ -105,6 +137,24 @@ int main (int argc, char ** argv){
     //Initialize values
     veggies->numSalads = 3;
     veggies->c = 0;
+    veggies->TO_tomweight=0;
+    veggies->TP_tomweight=0;
+    veggies->TO_onweight=0;
+    veggies->OP_onweight=0;
+    veggies->TP_pepweight=0;
+    veggies->OP_pepweight=0;
+    veggies->TO_tom_dif=0;
+    veggies->TP_tom_dif=0;
+    veggies->OP_on_dif=0;
+    veggies->TO_on_dif=0;
+    veggies->TP_pep_dif=0;
+    veggies->OP_pep_dif=0;
+    veggies->TO_wait=0;
+    veggies->TO_make=0;
+    veggies->TP_wait=0;
+    veggies->TP_make=0;
+    veggies->OP_make=0;
+    veggies->OP_wait=0;
 
     //Make new memory for c
 
@@ -177,13 +227,13 @@ int main (int argc, char ** argv){
     getchar();
 
 
-    for(int i = 0; i < 2; i++){
+    for(int i = 0; i < 3; i++){
 
         unsigned seed = time(0);
         srand(seed);
 
-        int r = rand();
-        // int r = 4;
+        // int r = rand();
+        int r = 3;
         printf("R = %d\n", r);
 
         if (r % 3 == 0)
@@ -193,17 +243,27 @@ int main (int argc, char ** argv){
         printf("I notified the TO saladmaker to grab them\n"); //To is allowed to grab
         sleep(5);
         sem_post(t); // Change t = 1
-        //Put [2-3] tomatoes of [60-100] g each
-        veggies->tom1 = 60;
+        //Random to decide weight of tomatoes in range 60-100
+        sleep(1);
+        seed = time(0);
+        srand(seed);
+        veggies->tom1 = printRandoms(60,100,1);
         printf("Tom1 = %d\n",veggies->tom1);
-        veggies->tom2 = 80;
+        sleep(1);
+        srand(time(0));
+        veggies->tom2 = printRandoms(60,100,1);
         printf("Tom2 = %d\n",veggies->tom2);
-        veggies->tom3 = 100;
-        printf("Tom3 = %d\n",veggies->tom3);
-        //tom1 = [60-100]
-        //if rand = 1 --> tom3 = [60-100], else tom3 = 0
+        sleep(1);
+        //Random to decide if 3 tomatoes
+        seed = time(0);
+        srand(seed);
+        x = rand();
+        if(x % 2 == 0){
+            veggies->tom3 = printRandoms(60,100,1);
+            printf("Tom3 = %d\n",veggies->tom3);   
+        }
         printf("I put tomatoes on the workbench\n");
-        sleep(5);
+        sleep(25);
         printf("Tom1 = %d\n",veggies->tom1);
         printf("Tom2 = %d\n",veggies->tom2);
         printf("Tom3 = %d\n",veggies->tom3);
@@ -215,15 +275,17 @@ int main (int argc, char ** argv){
         veggies->tom2 = 80;
         printf("On2 = %d\n",veggies->on2);
         printf("I put onions on the workbench\n");
-        sleep(5);
+        sleep(10);
         printf("On1 = %d\n",veggies->on1);
         printf("On2 = %d\n",veggies->on2);
         sem_wait(to);
         sem_getvalue(to, &val);
         printf("The TO saladmaker got what they needed: %d\n", val);
+
         }
 
-        if (r % 3 == 1){
+        if (r % 3 == 1)
+        {
         //Saladmaker that needs tomato and pepper
         sem_post(tp); //Change tp = 1
         printf("I notified the TP saladmaker tp grab them\n"); //tp is allowed tp grab
@@ -239,7 +301,7 @@ int main (int argc, char ** argv){
         //tom1 = [60-100]
         //if rand = 1 --> tom3 = [60-100], else tom3 = 0
         printf("I put tomatoes on the workbench\n");
-        sleep(5);
+        sleep(15);
         printf("Tom1 = %d\n",veggies->tom1);
         printf("Tom2 = %d\n",veggies->tom2);
         printf("Tom3 = %d\n",veggies->tom3);
@@ -251,7 +313,7 @@ int main (int argc, char ** argv){
         printf("Pep2 = %d\n",veggies->pep2);
         //if rand = 1 --> tom3 = [60-100], else tom3 = 0
         printf("I put peppers on the workbench\n");
-        sleep(5);
+        sleep(10);
         printf("Pep1 = %d\n",veggies->pep1);
         printf("Pep2 = %d\n",veggies->pep2);
         sem_wait(tp);
@@ -273,7 +335,7 @@ int main (int argc, char ** argv){
         veggies->tom2 = 80;
         printf("On2 = %d\n",veggies->on2);
         printf("I put onions on the workbench\n");
-        sleep(5);
+        sleep(15);
         printf("On1 = %d\n",veggies->on1);
         printf("On2 = %d\n",veggies->on2);
         sem_post(p); // Change t = 1
@@ -284,7 +346,7 @@ int main (int argc, char ** argv){
         printf("Pep2 = %d\n",veggies->pep2);
         //if rand = 1 --> tom3 = [60-100], else tom3 = 0
         printf("I put peppers on the workbench\n");
-        sleep(5);
+        sleep(10);
         printf("Pep1 = %d\n",veggies->pep1);
         printf("Pep2 = %d\n",veggies->pep2);
         sem_wait(op); // Change to = 0 again after Saladmaker says I am finished
@@ -296,10 +358,25 @@ int main (int argc, char ** argv){
     }
 
     printf("Total number of salads made: %d\n",veggies->c);
-    //TO Stats
-    //TP Stats
-    //OP Stats
+    printf("---------------\n");
+    printf("TO stats:\n");
+    printf("TO_Tom: %d, TO_On: %d\n", veggies->TO_tomweight, veggies->TO_onweight);
+    printf("TO- Time Wait: %lf, TO- Time Make: %lf\n", veggies->TO_wait, veggies->TO_make);
+    printf("---------------\n");
+    printf("TP stats:\n");
+    printf("TO_Tom: %d, TP_Pep: %d\n", veggies->TP_tomweight, veggies->TP_pepweight);
+    printf("TP- Time Wait: %lf, TP- Time Make: %lf\n", veggies->TP_wait, veggies->TP_make);
+    printf("---------------\n");
+    printf("OP stats:\n");
+    printf("OP_Pep: %d, OP_On: %d\n", veggies->OP_pepweight, veggies->OP_onweight);
+    printf("OP- Time Wait: %lf, OP- Time Make: %lf\n", veggies->OP_wait, veggies->OP_make);
+    printf("---------------");
+    printf("Temporal log accessible in file outfile\n");
+    //Time making
+    //Time waiting
     //Time salads were working in parallel
+    //Temporal log
+
 
     sem_close(to);
     sem_close(tp);
