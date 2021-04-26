@@ -109,7 +109,7 @@ int main (int argc, char **argv){
         printf (" Attached . Veggies\n");
 
     //Initialize values
-    veggies->numSalads = 3;
+    // veggies->numSalads = 0;
     veggies->c = 0;
     veggies->TO_tomweight=0;
     veggies->TP_tomweight=0;
@@ -197,6 +197,8 @@ int main (int argc, char **argv){
 
     int time1 = atoi(argv[1]);
     int time2 = atoi(argv[2]);
+    printf("NumSalads = %d\n", veggies->numSalads);
+
    
     //Saladmaker processes
     for( int i = 0; i < 3; i++)

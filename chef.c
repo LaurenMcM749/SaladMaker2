@@ -118,7 +118,7 @@ int main (int argc, char ** argv){
     const char * p_name;
     struct Veggies *veggies;
     int x;
-    int AnumSalads;
+  
 
     // Make shared memory segment
     // key - IPC_PRVIATE, size = 10, flag = 0666
@@ -224,16 +224,19 @@ int main (int argc, char ** argv){
         printf("Semaphore to exists already\n");
     }
 
+    printf("NumSalads = %s\n", argv[1]);
+    veggies->numSalads = atoi(argv[1]);
+    printf("Time to wait in between = %s\n", argv[2]);
+    int time2wait = atoi(argv[2]);
+
     printf (" Start other process . >"); 
 
     getchar();
 
-    printf("NumSalads = %s\n", argv[1]);
-    AnumSalads = atoi(argv[1]);
-    printf("Time to wait in between = %s\n", argv[2]);
-    int time2wait = atoi(argv[2]);
+ 
 
-    for(int i = 0; i < AnumSalads; i++){
+    for(int i = 0; i < veggies->numSalads; i++){
+
 
         unsigned seed = time(0);
         srand(seed);
