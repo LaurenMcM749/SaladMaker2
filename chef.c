@@ -46,6 +46,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <sys/time.h>
 
 // Generates and prints 'count' random
 // numbers in range [lower, upper].
@@ -117,6 +118,7 @@ int main (int argc, char ** argv){
     const char * p_name;
     struct Veggies *veggies;
     int x;
+    int AnumSalads;
 
     // Make shared memory segment
     // key - IPC_PRVIATE, size = 10, flag = 0666
@@ -226,8 +228,12 @@ int main (int argc, char ** argv){
 
     getchar();
 
+    printf("NumSalads = %s\n", argv[1]);
+    AnumSalads = atoi(argv[1]);
+    printf("Time to wait in between = %s\n", argv[2]);
+    int time2wait = atoi(argv[2]);
 
-    for(int i = 0; i < 3; i++){
+    for(int i = 0; i < AnumSalads; i++){
 
         unsigned seed = time(0);
         srand(seed);
@@ -286,6 +292,7 @@ int main (int argc, char ** argv){
         sem_wait(to);
         sem_getvalue(to, &val);
         printf("The TO saladmaker got what they needed: %d\n", val);
+        sleep(printRandoms(1,time2wait,1));
 
         }
 
@@ -340,6 +347,7 @@ int main (int argc, char ** argv){
         sem_wait(tp);
         sem_getvalue(tp, &val);
         printf("The tp saladmaker got what they needed: %d\n", val);
+        sleep(printRandoms(1,time2wait,1));
         }
 
         if (r % 3 == 2)
@@ -382,6 +390,7 @@ int main (int argc, char ** argv){
         // sleep(15);
         sem_wait(op); // Change to = 0 again after Saladmaker says I am finished
         printf("The op saladmaker got what they needed\n");
+        sleep(printRandoms(1,time2wait,1));
             
         }
 
@@ -401,8 +410,8 @@ int main (int argc, char ** argv){
     printf("OP stats:\n");
     printf("OP_Pep: %d, OP_On: %d\n", veggies->OP_pepweight, veggies->OP_onweight);
     printf("OP- Time Wait: %lf, OP- Time Make: %lf\n", veggies->OP_wait, veggies->OP_make);
-    printf("---------------");
-    printf("Temporal log accessible in file outfile\n");
+    printf("---------------\n");
+    printf("Temporal log accessible in file - outfile\n");
     //Time making
     //Time waiting
     //Time salads were working in parallel

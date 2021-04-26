@@ -13,6 +13,18 @@
 
 // Time source: https://levelup.gitconnected.com/8-ways-to-measure-execution-time-in-c-c-48634458d0f9
 
+// Generates and prints 'count' random
+// numbers in range [lower, upper].
+int printRandoms(int lower, int upper, int count)                         
+{
+    int i;
+    for (i = 0; i < count; i++) {
+        int num = (rand() %(upper - lower + 1)) + lower;
+        return num;
+    }
+}
+
+
 int main (int argc, char **argv){
 
        struct Veggies{
@@ -75,7 +87,6 @@ int main (int argc, char **argv){
     time_t rawtime;
     struct tm * timeinfo;
 
-    
 
     if (outfile == NULL){
         printf("Error opening outfile\n");
@@ -87,7 +98,7 @@ int main (int argc, char **argv){
     }
 
     //Get id from command line
-    sscanf ( argv [1] , "%d", &id); 
+    sscanf ( argv [3] , "%d", &id); 
     printf ("Id is %d\n", id);
 
     //Attach values to memory
@@ -184,11 +195,8 @@ int main (int argc, char **argv){
         printf("Semaphore out exists already\n");
     }
 
-    //Set max number of salads
-
-    // *c = 0;
-    // *numSalads = 3;
-
+    int time1 = atoi(argv[1]);
+    int time2 = atoi(argv[2]);
    
     //Saladmaker processes
     for( int i = 0; i < 3; i++)
@@ -211,7 +219,12 @@ int main (int argc, char **argv){
 
                 while (veggies->c < veggies->numSalads)
                 {
+                    // outfile = fopen("outfile","a");
                     printf("TO: I'm waiting to grab tomato and onion\n");
+                    //1 Log
+                    sem_wait(out);
+                    fprintf(outfile,"TO: I'm waiting to grab tomato and onion %s\n", asctime (timeinfo));
+                    sem_post(out);
                     printf("Added pepper to the cutting board!\n");
                     // Start measuring waiting time
                     struct timeval begin, end;
@@ -249,6 +262,10 @@ int main (int argc, char **argv){
                     veggies->tom2 = 0;
                     veggies->tom3 = 0;
                     printf("TO: I grabbed %d g tomato\n", veggies->TO_tomweight);
+                    //2 Log
+                    sem_wait(out);
+                    fprintf(outfile,"TO: I grabbed %d g tomato %s\n", veggies->TO_tomweight, asctime (timeinfo));
+                    sem_post(out);
                     //Grab and weigh onion
                     sem_wait(o); 
                     veggies->TO_onweight += veggies->TO_on_dif;
@@ -257,17 +274,22 @@ int main (int argc, char **argv){
                     veggies->on1 = 0;
                     veggies->on2 = 0;
                     printf("TO: I grabbed %d g onions off workbench\n", veggies->TO_onweight);
+                    //3 Log
+                    sem_wait(out);
+                    fprintf(outfile,"TO: I grabbed %d g onions %s\n", veggies->TO_onweight, asctime (timeinfo));
+                    sem_post(out);
                     veggies->c = veggies->c + 1; 
                     sem_post(to); // ("I am done") - Now chef can issue wait
                     sleep(15); //Wait for chef to get I am done signal 
                     //This is where other processes can work in parallel
-
                     printf("TO: I got the tomato and the onion I needed!\n");
                     printf("TO: Time to chop and keep the difference for next time\n");
-                    // if my_tomweight > 300 {dif = my_tomweight - 300, my_tomweight = 300}
-                    // TO_total_tomweight += my_tomweight 
-                    sleep(3);
+                    sleep(printRandoms(time1,time2,1));
                     //End time
+                    //4 Log
+                    sem_wait(out);
+                    fprintf(outfile,"TO: I made the salad %s\n", asctime (timeinfo));
+                    sem_post(out);
                     printf("%d salads made\n",veggies->c);
                     // Stop measuring time and calculate the working time
                     gettimeofday(&end, 0);
@@ -285,7 +307,12 @@ int main (int argc, char **argv){
                 //Need TomPep
                 while (veggies->c < veggies->numSalads)
                 {
+                    // outfile = fopen("outfile","a");
                     printf("TP: I'm waiting to grab tomato and pepper\n");
+                    //1 Log
+                    sem_wait(out);
+                    fprintf(outfile,"TP: I'm waiting to grab tomato and pepper %s\n", asctime (timeinfo));
+                    sem_post(out);
                     printf("Added onion to the cutting board!\n");
                     // Start measuring waiting time
                     struct timeval begin, end;
@@ -301,9 +328,6 @@ int main (int argc, char **argv){
                     long microseconds = end.tv_usec - begin.tv_usec;
                     double elapsed = seconds + microseconds*1e-6;
                     printf("TP Time waited: %.3f seconds.\n", elapsed);//End time
-
-                    // fputs("TP wait: %lf",elapsed,outfile);
-                    //fprintf( outfile, "TP wait: %lf\n",elapsed);
                     time ( &rawtime );
                     timeinfo = localtime ( &rawtime );
                     sem_wait(out);
@@ -324,6 +348,10 @@ int main (int argc, char **argv){
                     veggies->tom2 = 0;
                     veggies->tom3 = 0;
                     printf("TP: I grabbed %d g tomato\n", veggies->TP_tomweight);
+                    //2 Log
+                    sem_wait(out);
+                    fprintf(outfile,"TP: I grabbed %d g tomato %s\n", veggies->TP_tomweight, asctime (timeinfo));
+                    sem_post(out);
                     //Grab pepper
                     sem_wait(p); //Bug - stuck here - I think chef has changed to too fast so locks out
                     veggies->TP_pepweight += veggies->TP_pep_dif;
@@ -332,12 +360,21 @@ int main (int argc, char **argv){
                     veggies->pep1 = 0;
                     veggies->pep2 = 0;
                     printf("TP: I grabbed %d g pepper\n", veggies->TP_pepweight);
+                    //3 Log
+                    sem_wait(out);
+                    fprintf(outfile,"TP: I grabbed %d g pepper %s\n", veggies->TP_pepweight, asctime (timeinfo));
+                    sem_post(out);
                     veggies->c = veggies->c + 1;  
                     sem_post(tp); // ("I am done") - Now chef can issue wait
                     sleep(15); //Wait for chef to get I am done signal 
                     printf("TP: I got the tomato and pepper I needed!\n");
                     printf("TP: Time to weigh, chop, and serve\n");
-                    sleep(3);
+                    //Log 4
+                    sem_wait(out);
+                    fprintf(outfile,"TP: I made the salad %s\n", asctime (timeinfo));
+                    sem_post(out);
+                    //Make the salad
+                    sleep(printRandoms(time1,time2,1));
                     printf("%d salads made\n",veggies->c);
                     // Stop measuring time and calculate the elapsed time
                     gettimeofday(&end, 0);
@@ -347,6 +384,7 @@ int main (int argc, char **argv){
                     printf("TP Time making: %.3f seconds.\n", elapsed);//End time
                     veggies->TP_make += elapsed;
                     sleep(10);
+                    // fclose(outfile);
                 }
 
                 }
@@ -358,7 +396,12 @@ int main (int argc, char **argv){
                 //Need TomPep
                 while (veggies->c < veggies->numSalads)
                 {
+                    // outfile = fopen("outfile","a");
                     printf("OP: I'm waiting to grab onion and pepper\n");
+                    //1 Log
+                    sem_wait(out);
+                    fprintf(outfile,"OP: I'm waiting to grab onion and pepper %s\n", asctime (timeinfo));
+                    sem_post(out);
                     printf("Added tomato to the cutting board!\n");
                     // Start measuring waiting time
                     struct timeval begin, end;
@@ -377,9 +420,6 @@ int main (int argc, char **argv){
                    // fprintf(outfile, "OP wait: %lf\n",elapsed);
                     time ( &rawtime );
                     timeinfo = localtime ( &rawtime );
-                    sem_wait(out);
-                    fprintf (outfile, "OP time: %s", asctime (timeinfo) );
-                    sem_post(out);
                     sem_getvalue(out, &val);
                     printf("OP: Out = %d\n", val);
                     veggies->OP_wait += elapsed;
@@ -393,6 +433,10 @@ int main (int argc, char **argv){
                     veggies->on1 = 0;
                     veggies->on2 = 0;
                     printf("OP: I grabbed %d g onions off workbench\n",  veggies->OP_onweight);
+                    //2 Log
+                    sem_wait(out);
+                    fprintf(outfile,"TP: I grabbed %d g onions %s\n", veggies->OP_onweight, asctime (timeinfo));
+                    sem_post(out);
                     //Grab pepper
                     sem_wait(p);
                     veggies->OP_pepweight += veggies->OP_pep_dif;
@@ -401,12 +445,21 @@ int main (int argc, char **argv){
                     veggies->pep1 = 0;
                     veggies->pep2 = 0;
                     printf("OP: I grabbed %d g pepper\n", veggies->OP_pepweight);
+                    //3 Log
+                    sem_wait(out);
+                    fprintf(outfile,"OP: I grabbed %d g pepper %s\n", veggies->OP_pepweight, asctime (timeinfo));
+                    sem_post(out);
                     veggies->c = veggies->c + 1; 
                     sem_post(op); // ("I am done") - Now chef can issue wait
                     sleep(15); //Wait for chef to get I am done signal 
                     printf("Op: I got the tomato and pepper I needed!\n");
                     printf("Op: Time to weigh, chop, and serve\n");
-                    sleep(3);
+                     //Log 4
+                    sem_wait(out);
+                    fprintf(outfile,"OP: I made the salad %s\n", asctime (timeinfo));
+                    sem_post(out);
+                    //Make the salad
+                    sleep(printRandoms(time1,time2,1));
                     printf("%d salads made\n",veggies->c);
                     // Stop measuring time and calculate the waiting time
                     gettimeofday(&end, 0);
@@ -416,6 +469,7 @@ int main (int argc, char **argv){
                     printf("OP Time making: %.3f seconds.\n", elapsed);//End time
                     veggies->OP_make += elapsed;
                     sleep(10);
+                    // fclose(outfile);
                 }
 
                 }
@@ -428,7 +482,7 @@ int main (int argc, char **argv){
 
     }
 
-        // fclose(outfile);
+        fclose(outfile);
 
       
         sem_close(to);
