@@ -62,6 +62,7 @@ int main (int argc, char **argv){
     sem_t *to; 
     sem_t *tp;
     sem_t *op;
+    sem_t *out;
     const char * tp_name;
     const char * to_name;
     const char * op_name;
@@ -175,6 +176,14 @@ int main (int argc, char **argv){
         printf("Semaphore to exists already\n");
     }
 
+    out = sem_open("/out_name", O_CREAT, 0666, 1);
+    if(out != SEM_FAILED){
+        printf("Created semaphore out\n");
+    }
+    else if (errno == EEXIST){
+        printf("Semaphore out exists already\n");
+    }
+
     //Set max number of salads
 
     // *c = 0;
@@ -211,22 +220,27 @@ int main (int argc, char **argv){
                     sem_wait(to);
                     sem_getvalue(to, &val);
                     printf("After wait: TO = %d\n", val );
+                    // sleep(20);
                     // Stop measuring time and calculate the elapsed time
                     gettimeofday(&end, 0);
                     long seconds = end.tv_sec - begin.tv_sec;
                     long microseconds = end.tv_usec - begin.tv_usec;
                     double elapsed = seconds + microseconds*1e-6;
-                    printf("Time waited: %.3f seconds.\n", elapsed);//End time
+                    printf("TO Time waited: %.3f seconds.\n", elapsed);//End time
                     // fprintf( outfile, "TO wait: %lf\n",elapsed);
                     time ( &rawtime );
                     timeinfo = localtime ( &rawtime );
-                    fprintf ( outfile, "TO time: %s", asctime (timeinfo) );
+                    sem_wait(out);
+                    fprintf (outfile, "TO time: %s", asctime (timeinfo) );
+                    sem_post(out);
+                    sem_getvalue(out, &val);
+                    printf("TO: Out = %d\n", val);
                     veggies->TO_wait += elapsed;
                     // Start measuring working time
                     gettimeofday(&begin, 0);
                     //Grab and weigh tomato
                     sem_wait(t);
-                    sleep(10); 
+                    // sleep(10); 
                     veggies->TO_tomweight += veggies->TO_tom_dif;
                     veggies->TO_tomweight += veggies->tom1;
                     veggies->TO_tomweight += veggies->tom2;
@@ -244,8 +258,10 @@ int main (int argc, char **argv){
                     veggies->on2 = 0;
                     printf("TO: I grabbed %d g onions off workbench\n", veggies->TO_onweight);
                     veggies->c = veggies->c + 1; 
-                    sem_post(to); // ("I am done") - Now chef can issue wait 
+                    sem_post(to); // ("I am done") - Now chef can issue wait
+                    sleep(15); //Wait for chef to get I am done signal 
                     //This is where other processes can work in parallel
+
                     printf("TO: I got the tomato and the onion I needed!\n");
                     printf("TO: Time to chop and keep the difference for next time\n");
                     // if my_tomweight > 300 {dif = my_tomweight - 300, my_tomweight = 300}
@@ -258,7 +274,7 @@ int main (int argc, char **argv){
                     seconds = end.tv_sec - begin.tv_sec;
                     microseconds = end.tv_usec - begin.tv_usec;
                     elapsed = seconds + microseconds*1e-6;
-                    printf("Time making: %.3f seconds.\n", elapsed);//End time
+                    printf("TO Time making: %.3f seconds.\n", elapsed);//End time
                     veggies->TO_make += elapsed;
                     sleep(10);
                 }
@@ -278,18 +294,23 @@ int main (int argc, char **argv){
                     sem_wait(tp);
                     sem_getvalue(tp, &val);
                     printf("After wait: TP = %d\n", val );
+                    // sleep(20);
                     // Stop measuring time and calculate the elapsed time
                     gettimeofday(&end, 0);
                     long seconds = end.tv_sec - begin.tv_sec;
                     long microseconds = end.tv_usec - begin.tv_usec;
                     double elapsed = seconds + microseconds*1e-6;
-                    printf("Time waited: %.3f seconds.\n", elapsed);//End time
+                    printf("TP Time waited: %.3f seconds.\n", elapsed);//End time
 
                     // fputs("TP wait: %lf",elapsed,outfile);
                     //fprintf( outfile, "TP wait: %lf\n",elapsed);
                     time ( &rawtime );
                     timeinfo = localtime ( &rawtime );
+                    sem_wait(out);
                     fprintf ( outfile, "TP time: %s", asctime (timeinfo) );
+                    sem_post(out);
+                    sem_getvalue(out, &val);
+                    printf("TP: Out = %d\n", val);
                     veggies->TP_wait += elapsed;
                     // Start measuring working time
                     gettimeofday(&begin, 0);
@@ -313,6 +334,7 @@ int main (int argc, char **argv){
                     printf("TP: I grabbed %d g pepper\n", veggies->TP_pepweight);
                     veggies->c = veggies->c + 1;  
                     sem_post(tp); // ("I am done") - Now chef can issue wait
+                    sleep(15); //Wait for chef to get I am done signal 
                     printf("TP: I got the tomato and pepper I needed!\n");
                     printf("TP: Time to weigh, chop, and serve\n");
                     sleep(3);
@@ -322,7 +344,7 @@ int main (int argc, char **argv){
                     seconds = end.tv_sec - begin.tv_sec;
                     microseconds = end.tv_usec - begin.tv_usec;
                     elapsed = seconds + microseconds*1e-6;
-                    printf("Time making: %.3f seconds.\n", elapsed);//End time
+                    printf("TP Time making: %.3f seconds.\n", elapsed);//End time
                     veggies->TP_make += elapsed;
                     sleep(10);
                 }
@@ -345,16 +367,21 @@ int main (int argc, char **argv){
                     sem_wait(op);
                     sem_getvalue(op, &val);
                     printf("After wait: op = %d\n", val );
+                    // sleep(20);
                     // Stop measuring time and calculate the waiting time
                     gettimeofday(&end, 0);
                     long seconds = end.tv_sec - begin.tv_sec;
                     long microseconds = end.tv_usec - begin.tv_usec;
                     double elapsed = seconds + microseconds*1e-6;
-                    printf("Time waited: %.3f seconds.\n", elapsed);//End time
+                    printf("OP Time waited: %.3f seconds.\n", elapsed);//End time
                    // fprintf(outfile, "OP wait: %lf\n",elapsed);
                     time ( &rawtime );
                     timeinfo = localtime ( &rawtime );
+                    sem_wait(out);
                     fprintf (outfile, "OP time: %s", asctime (timeinfo) );
+                    sem_post(out);
+                    sem_getvalue(out, &val);
+                    printf("OP: Out = %d\n", val);
                     veggies->OP_wait += elapsed;
                     // Start measuring making time
                     gettimeofday(&begin, 0);
@@ -376,6 +403,7 @@ int main (int argc, char **argv){
                     printf("OP: I grabbed %d g pepper\n", veggies->OP_pepweight);
                     veggies->c = veggies->c + 1; 
                     sem_post(op); // ("I am done") - Now chef can issue wait
+                    sleep(15); //Wait for chef to get I am done signal 
                     printf("Op: I got the tomato and pepper I needed!\n");
                     printf("Op: Time to weigh, chop, and serve\n");
                     sleep(3);
@@ -385,7 +413,7 @@ int main (int argc, char **argv){
                     seconds = end.tv_sec - begin.tv_sec;
                     microseconds = end.tv_usec - begin.tv_usec;
                     elapsed = seconds + microseconds*1e-6;
-                    printf("Time making: %.3f seconds.\n", elapsed);//End time
+                    printf("OP Time making: %.3f seconds.\n", elapsed);//End time
                     veggies->OP_make += elapsed;
                     sleep(10);
                 }
@@ -409,6 +437,7 @@ int main (int argc, char **argv){
         sem_close(t);
         sem_close(o);
         sem_close(p);
+        sem_close(out);
 
         sem_unlink("/to_name");
         sem_unlink("/tp_name");
@@ -416,6 +445,7 @@ int main (int argc, char **argv){
         sem_unlink("/t_name");
         sem_unlink("/p_name");
         sem_unlink("/o_name");
+        sem_unlink("/out_name");
        
 
 

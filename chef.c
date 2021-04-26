@@ -232,8 +232,8 @@ int main (int argc, char ** argv){
         unsigned seed = time(0);
         srand(seed);
 
-        // int r = rand();
-        int r = 3;
+        int r = rand();
+        // int r = 3;
         printf("R = %d\n", r);
 
         if (r % 3 == 0)
@@ -242,7 +242,6 @@ int main (int argc, char ** argv){
         sem_post(to); 
         printf("I notified the TO saladmaker to grab them\n"); //To is allowed to grab
         sleep(5);
-        sem_post(t); // Change t = 1
         //Random to decide weight of tomatoes in range 60-100
         sleep(1);
         seed = time(0);
@@ -262,22 +261,28 @@ int main (int argc, char ** argv){
             veggies->tom3 = printRandoms(60,100,1);
             printf("Tom3 = %d\n",veggies->tom3);   
         }
+        sem_post(t); // Change t = 1
         printf("I put tomatoes on the workbench\n");
-        sleep(25);
+        sleep(30);
         printf("Tom1 = %d\n",veggies->tom1);
         printf("Tom2 = %d\n",veggies->tom2);
         printf("Tom3 = %d\n",veggies->tom3);
-        sem_post(o); // Change t = 1
-        //Put [1-2] onions of [40-80] g each
-        veggies->on1 = 40;
-        veggies->on2 = 60;
+        // sem_post(o); // Change t = 1
+        //Random weight of onion 1 from 40-80
+        sleep(1);
+        srand(time(0));
+        veggies->on1 = printRandoms(40,80,1);
         printf("On1 = %d\n",veggies->on1);
-        veggies->tom2 = 80;
-        printf("On2 = %d\n",veggies->on2);
+        //Random to decide if 2 onions
+        srand(time(0));
+        x = rand();
+        if(x % 2 == 0){
+            veggies->on2 = printRandoms(40,80,1);
+            printf("On2 = %d\n",veggies->on2);  
+        } 
+        sem_post(o);
         printf("I put onions on the workbench\n");
-        sleep(10);
-        printf("On1 = %d\n",veggies->on1);
-        printf("On2 = %d\n",veggies->on2);
+        // sleep(10);
         sem_wait(to);
         sem_getvalue(to, &val);
         printf("The TO saladmaker got what they needed: %d\n", val);
@@ -290,32 +295,48 @@ int main (int argc, char ** argv){
         sem_post(tp); //Change tp = 1
         printf("I notified the TP saladmaker tp grab them\n"); //tp is allowed tp grab
         sleep(5);
-        sem_post(t); // Change t = 1
-        //Put [2-3] tomatoes of [60-100] g each
-        veggies->tom1 = 60;
+         //sem_post(t); // Change t = 1
+        //Random to decide weight of tomatoes in range 60-100
+        sleep(1);
+        seed = time(0);
+        srand(seed);
+        veggies->tom1 = printRandoms(60,100,1);
         printf("Tom1 = %d\n",veggies->tom1);
-        veggies->tom2 = 80;
+        sleep(1);
+        srand(time(0));
+        veggies->tom2 = printRandoms(60,100,1);
         printf("Tom2 = %d\n",veggies->tom2);
-        veggies->tom3 = 100;
-        printf("Tom3 = %d\n",veggies->tom3);
-        //tom1 = [60-100]
-        //if rand = 1 --> tom3 = [60-100], else tom3 = 0
+        sleep(1);
+        //Random to decide if 3 tomatoes
+        seed = time(0);
+        srand(seed);
+        x = rand();
+        if(x % 2 == 0){
+            veggies->tom3 = printRandoms(60,100,1);
+            printf("Tom3 = %d\n",veggies->tom3);   
+        }
+        sem_post(t);
         printf("I put tomatoes on the workbench\n");
-        sleep(15);
+        sleep(30);
         printf("Tom1 = %d\n",veggies->tom1);
         printf("Tom2 = %d\n",veggies->tom2);
         printf("Tom3 = %d\n",veggies->tom3);
-        sem_post(p); // Change t = 1
-        //Put [1-2] peppers of [60-100] g each
-        veggies->pep1 = 60;
+        //sem_post(p); // Change t = 1
+         //Random weight of pepper 1 from 60-100
+        sleep(1);
+        srand(time(0));
+        veggies->pep1 = printRandoms(60,100,1);
         printf("Pep1 = %d\n",veggies->pep1);
-        veggies->pep2 = 80;
-        printf("Pep2 = %d\n",veggies->pep2);
-        //if rand = 1 --> tom3 = [60-100], else tom3 = 0
+         //Random to decide if 2 peppers
+        srand(time(0));
+        x = rand();
+        if(x % 2 == 0){
+            veggies->pep2 = printRandoms(60,100,1);
+            printf("Pep2 = %d\n",veggies->pep2);
+        } 
+        sem_post(p);
         printf("I put peppers on the workbench\n");
-        sleep(10);
-        printf("Pep1 = %d\n",veggies->pep1);
-        printf("Pep2 = %d\n",veggies->pep2);
+        // sleep(15);
         sem_wait(tp);
         sem_getvalue(tp, &val);
         printf("The tp saladmaker got what they needed: %d\n", val);
@@ -327,28 +348,38 @@ int main (int argc, char ** argv){
         sem_post(op); //Change to = 1
         printf("I notified the OP saladmaker to grab them\n"); //To is allowed to grab
         sleep(5);
-        sem_post(o); // Change t = 1
-        //Put [1-2] onions of [40-80] g each
-        veggies->on1 = 40;
-        veggies->on2 = 60;
+        // sem_post(o); // Change t = 1
+        //Random weight of onion 1 from 40-80
+        sleep(1);
+        srand(time(0));
+        veggies->on1 = printRandoms(40,80,1);
         printf("On1 = %d\n",veggies->on1);
-        veggies->tom2 = 80;
-        printf("On2 = %d\n",veggies->on2);
+        //Random to decide if 2 onions
+        srand(time(0));
+        x = rand();
+        if(x % 2 == 0){
+            veggies->on2 = printRandoms(40,80,1);
+            printf("On2 = %d\n",veggies->on2);  
+        } 
+        sem_post(o);
         printf("I put onions on the workbench\n");
-        sleep(15);
-        printf("On1 = %d\n",veggies->on1);
-        printf("On2 = %d\n",veggies->on2);
-        sem_post(p); // Change t = 1
-        //Put [1-2] peppers of [60-100] g each
-        veggies->pep1 = 60;
+        sleep(30);
+        //sem_post(p); // Change t = 1
+        //Random weight of pepper 1 from 60-100
+        sleep(1);
+        srand(time(0));
+        veggies->pep1 = printRandoms(60,100,1);
         printf("Pep1 = %d\n",veggies->pep1);
-        veggies->pep2 = 80;
-        printf("Pep2 = %d\n",veggies->pep2);
-        //if rand = 1 --> tom3 = [60-100], else tom3 = 0
+         //Random to decide if 2 peppers
+        srand(time(0));
+        x = rand();
+        if(x % 2 == 0){
+            veggies->pep2 = printRandoms(60,100,1);
+            printf("Pep2 = %d\n",veggies->pep2);
+        } 
+        sem_post(p); 
         printf("I put peppers on the workbench\n");
-        sleep(10);
-        printf("Pep1 = %d\n",veggies->pep1);
-        printf("Pep2 = %d\n",veggies->pep2);
+        // sleep(15);
         sem_wait(op); // Change to = 0 again after Saladmaker says I am finished
         printf("The op saladmaker got what they needed\n");
             
